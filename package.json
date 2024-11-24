@@ -1,0 +1,21 @@
+{
+    "name": "swags-website-template",
+    "module": "server/index.ts",
+    "type": "module",
+    "devDependencies": {
+        "@types/bun": "latest"
+    },
+    "peerDependencies": {
+        "typescript": "^5.0.0"
+    },
+    "dependencies": {
+        "@types/mime-types": "^2.1.4",
+        "hono": "^4.6.11",
+        "mime-types": "^2.1.35",
+        "prettier": "^3.3.3"
+    },
+    "scripts": {
+        "start": "bun run server/index.ts",
+        "format": "bun x prettier --write ."
+    }
+}

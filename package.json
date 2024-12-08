@@ -6,13 +6,13 @@
         "@types/bun": "latest"
     },
     "peerDependencies": {
-        "typescript": "^5.0.0"
+        "typescript": "^5.7.2"
     },
     "dependencies": {
         "@types/mime-types": "^2.1.4",
-        "hono": "^4.6.11",
+        "hono": "^4.6.13",
         "mime-types": "^2.1.35",
-        "prettier": "^3.3.3"
+        "prettier": "^3.4.2"
     },
     "scripts": {
         "start": "bun run server/index.ts",

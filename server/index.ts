@@ -12,12 +12,13 @@ import { domains } from './domains';
 import fs from 'node:fs';
 import * as nodePath from 'node:path';
 import mime from 'mime-types';
+import { execFileSync } from 'node:child_process';
 
 const server = new Hono({
     getPath: (req) => '/' + req.headers.get('host') + req.url.replace(/^https?:\/\/[^/]+(\/[^?]*)/, '$1'),
 });
 
-server.use((context, next) => {
+server.use(async (context, next) => {
     const url = new URL(context.req.url);
     const providedPath = nodePath
         .normalize(url.pathname)
@@ -36,22 +37,48 @@ server.use((context, next) => {
     let path = providedPath.replace(domain, '').replaceAll(/\/{2,}/g, '/');
 
     if (path.endsWith('.html')) return context.redirect(path.replace('.html', '')) as any;
-    if (path.endsWith('/')) path += 'index.html';
-    if (!path.includes('.')) path += '.html';
+    if (path.endsWith('.php')) return context.redirect(path.replace('.php', '')) as any;
+    if (path.endsWith('/')) path += 'index';
 
-    const fileExists = fs.existsSync(nodePath.join(`./client/${domain}/`, path));
-    const backupFileExists = fs.existsSync(nodePath.join('./client/__all/', path));
+    let backupPath = path;
+
+    let fileExists = fs.existsSync(nodePath.join(`./client/${domain}/`, path));
+    let backupFileExists = fs.existsSync(nodePath.join('./client/__all/', backupPath));
+
+    if (!fileExists) {
+        path = path += '.html';
+        fileExists = fs.existsSync(nodePath.join(`./client/${domain}/`, path));
+        if (!fileExists) {
+            path = path.replace('.html', '.php');
+            fileExists = fs.existsSync(nodePath.join(`./client/${domain}/`, path));
+        }
+    }
+
+    if (!backupFileExists) {
+        backupPath += '.html';
+        backupFileExists = fs.existsSync(nodePath.join('./client/__all/', backupPath));
+        if (!backupFileExists) {
+            backupPath = path.replace('.html', '.php');
+            backupFileExists = fs.existsSync(nodePath.join('./client/__all/', backupPath));
+        }
+    }
 
     if (!fileExists && !backupFileExists) {
         context.req.path = context.req.path.replace(`${domain}/`, '');
         return next();
     }
 
-    const filePath = fileExists ? nodePath.join(`./client/${domain}/`, path) : nodePath.join('./client/__all/', path);
+    const filePath = fileExists
+        ? nodePath.join(`./client/${domain}/`, path)
+        : nodePath.join('./client/__all/', backupPath);
     const fileExt = nodePath.extname(filePath);
-    const file = fs.readFileSync(filePath);
+    let file = fs.readFileSync(filePath);
 
-    context.header('Content-Type', mime.lookup(fileExt) || 'application/octet-stream');
+    if (fileExt === '.php') file = execFileSync('./server/packages/php/php.exe', { input: file.toString() });
+
+    let meme = mime.lookup(fileExt);
+    if (meme === 'application/x-httpd-php') meme = 'text/html';
+    context.header('Content-Type', meme || 'application/octet-stream');
     return context.body(file.buffer.slice(file.byteOffset, file.byteOffset + file.byteLength) as any);
 });
 

@@ -47,7 +47,7 @@ server.use(async (context, next) => {
     let fileExists = fs.existsSync(nodePath.join(`./client/${domain}/`, path));
     let backupFileExists = fs.existsSync(nodePath.join('./client/__all/', backupPath));
 
-    if (!fileExists) {
+    if (!fileExists || fs.statSync(nodePath.join(`./client/${domain}/`, path)).isDirectory()) {
         path = path += '.html';
         fileExists = fs.existsSync(nodePath.join(`./client/${domain}/`, path));
         if (!fileExists) {
@@ -56,7 +56,7 @@ server.use(async (context, next) => {
         }
     }
 
-    if (!backupFileExists) {
+    if (!backupFileExists || fs.statSync(nodePath.join('./client/__all/', backupPath)).isDirectory()) {
         backupPath += '.html';
         backupFileExists = fs.existsSync(nodePath.join('./client/__all/', backupPath));
         if (!backupFileExists) {

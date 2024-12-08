@@ -74,7 +74,24 @@ server.use(async (context, next) => {
     const fileExt = nodePath.extname(filePath);
     let file = fs.readFileSync(filePath);
 
-    if (fileExt === '.php') file = execFileSync('./server/packages/php/php.exe', { input: file.toString() });
+    if (fileExt === '.php') {
+        let phpQuerySet = '';
+        url.searchParams.forEach((value, key) => (phpQuerySet += ` $_GET['${key}'] = '${value}';`));
+        try {
+            file = execFileSync('./server/packages/php/php.exe', {
+                input: `<?php 
+            $_SERVER['PHP_SELF'] = '${filePath}';  
+            chdir('${nodePath.dirname(filePath)}');
+            ${phpQuerySet}
+            ?> 
+        
+            ${file.toString()}`,
+            });
+        } catch (error) {
+            console.error(error);
+            return context.json(createError(500, 'PHP file could not be executed.')) as any;
+        }
+    }
 
     let meme = mime.lookup(fileExt);
     if (meme === 'application/x-httpd-php') meme = 'text/html';

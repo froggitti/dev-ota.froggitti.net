@@ -36,8 +36,10 @@ server.use(async (context, next) => {
 
     let path = providedPath.replace(domain, '').replaceAll(/\/{2,}/g, '/');
 
-    if (path.endsWith('.html')) return context.redirect(path.replace('.html', '')) as any;
-    if (path.endsWith('.php')) return context.redirect(path.replace('.php', '')) as any;
+    const query = url.searchParams.size > 0 ? '?' + url.searchParams.toString() : '';
+
+    if (path.endsWith('.html')) return context.redirect(path.replace('.html', '') + query) as any;
+    if (path.endsWith('.php')) return context.redirect(path.replace('.php', '') + query) as any;
     if (path.endsWith('/')) path += 'index';
 
     let backupPath = path;
@@ -71,6 +73,11 @@ server.use(async (context, next) => {
     const filePath = fileExists
         ? nodePath.join(`./client/${domain}/`, path)
         : nodePath.join('./client/__all/', backupPath);
+
+    if (fs.statSync(filePath).isDirectory()) {
+        return context.redirect(url.pathname + '/' + query) as any;
+    }
+
     const fileExt = nodePath.extname(filePath);
     let file = fs.readFileSync(filePath);
 

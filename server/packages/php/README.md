@@ -128,11 +128,11 @@ requests are merged.
 See further documents in the repository for more information on how to
 contribute:
 
-- [Contributing to PHP](/CONTRIBUTING.md)
-- [PHP coding standards](/CODING_STANDARDS.md)
-- [Internal documentation](https://php.github.io/php-src/)
-- [Mailing list rules](/docs/mailinglist-rules.md)
-- [PHP release process](/docs/release-process.md)
+-   [Contributing to PHP](/CONTRIBUTING.md)
+-   [PHP coding standards](/CODING_STANDARDS.md)
+-   [Internal documentation](https://php.github.io/php-src/)
+-   [Mailing list rules](/docs/mailinglist-rules.md)
+-   [PHP release process](/docs/release-process.md)
 
 ## Credits
 

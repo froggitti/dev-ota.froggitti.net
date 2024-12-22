@@ -85,8 +85,8 @@ server.use(async (context, next) => {
     if (fileExt === '.php') {
         let phpQuerySet = '';
         url.searchParams.forEach((value, key) => {
-            const sanitizedKey = key.replace(/[^a-zA-Z0-9_ .]/g, '');
-            const sanitizedValue = value.replace(/[^a-zA-Z0-9_ .]/g, '');
+            const sanitizedKey = key.replace(/[^a-zA-Z0-9_ ./]/g, '');
+            const sanitizedValue = value.replace(/[^a-zA-Z0-9_ ./]/g, '');
             phpQuerySet += ` $_GET['${sanitizedKey}'] = '${sanitizedValue}';`;
         });
         try {

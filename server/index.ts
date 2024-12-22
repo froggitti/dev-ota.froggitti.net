@@ -13,6 +13,7 @@ import fs from 'node:fs';
 import * as nodePath from 'node:path';
 import mime from 'mime-types';
 import { execFileSync } from 'node:child_process';
+import process from 'node:process';
 
 const server = new Hono({
     getPath: (req) => '/' + req.headers.get('host') + req.url.replace(/^https?:\/\/[^/]+(\/[^?]*)/, '$1'),
@@ -83,16 +84,14 @@ server.use(async (context, next) => {
 
     if (fileExt === '.php') {
         let phpQuerySet = '';
-        url.searchParams.forEach((value, key) => (phpQuerySet += ` $_GET['${key}'] = '${value}';`));
+        url.searchParams.forEach((value, key) => {
+            const sanitizedKey = key.replace(/[^a-zA-Z0-9_ .]/g, '');
+            const sanitizedValue = value.replace(/[^a-zA-Z0-9_ .]/g, '');
+            phpQuerySet += ` $_GET['${sanitizedKey}'] = '${sanitizedValue}';`;
+        });
         try {
             file = execFileSync('./server/packages/php/php.exe', {
-                input: `<?php 
-            $_SERVER['PHP_SELF'] = '${filePath}';  
-            chdir('${nodePath.dirname(filePath)}');
-            ${phpQuerySet}
-            ?> 
-        
-            ${file.toString()}`,
+                input: `<?php $_SERVER['PHP_SELF'] = '${filePath}'; chdir('${nodePath.dirname(filePath)}'); ${phpQuerySet} ?> ${file.toString()}`,
             });
         } catch (error) {
             console.error(error);
@@ -110,6 +109,8 @@ server.use((context, next) => {
     const path = context.req.path;
     if (path === '/@/domains') {
         return context.json({ domains: domains }) as any;
+    } else if (path === '/@/uptime') {
+        return context.json({ uptime: process.uptime() }) as any;
     } else {
         return next();
     }

@@ -14,6 +14,7 @@ import * as nodePath from 'node:path';
 import mime from 'mime-types';
 import { execFileSync } from 'node:child_process';
 import process from 'node:process';
+import api from './api';
 
 const server = new Hono({
     getPath: (req) => '/' + req.headers.get('host') + req.url.replace(/^https?:\/\/[^/]+(\/[^?]*)/, '$1'),
@@ -115,6 +116,8 @@ server.use((context, next) => {
         return next();
     }
 });
+
+api(server);
 
 server.notFound((context) => {
     if (context.req.query('@404')) {

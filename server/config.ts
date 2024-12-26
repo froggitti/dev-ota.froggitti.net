@@ -13,3 +13,8 @@ export const notFoundRedirect: string = '/404';
  * If false, the server will return a message error.
  */
 export const invalidDomainRedirect: false | string = 'http://localhost/404';
+
+/**
+ * Base domain name for the API.
+ */
+export const apiHostDomainName: string = 'api.localhost';

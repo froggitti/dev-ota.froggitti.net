@@ -1,4 +1,4 @@
-# swags-website-template
+# webserver
 
 To install dependencies:
 

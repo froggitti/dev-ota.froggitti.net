@@ -1,7 +1,7 @@
 /**
  * Port for the server to run on.
  */
-export const port: number = 443;
+
 
 /**
  * Path for the website to be redirected on a 404.
